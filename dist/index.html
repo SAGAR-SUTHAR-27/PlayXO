@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TIC TIC</title>
+
+  <!-- SEO Meta Tags -->
+  <meta name="description"
+    content="A professional, hyper-interactive Tic Tic arcade experience featuring neon themes, unbeatable minimax AI, synthesized background music, and canvas confetti.">
+  <meta name="keywords" content="Tic Tic, Minimax AI, Browser Game, Neon, Web Audio API, Canvas Confetti">
+  <meta name="author" content="Antigravity">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Syne:wght@700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Core Stylesheet -->
+  <script type="module" crossorigin src="/assets/index-kdpssEEi.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-xOTZ1xQU.css">
+</head>
+
+<body data-theme="cyberpunk">
+
+  <!-- Background Blurry Blobs for Glassmorphism -->
+  <div class="bg-blur-blobs" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <!-- 1. GAME LOADER SCREEN -->
+  <div id="game-loader" class="loader-screen">
+    <div class="loader-content">
+      <div class="loader-glitch-title">TIC_TIC</div>
+      <div class="loader-bar-container">
+        <div class="loader-bar-fill" id="loader-progress"></div>
+      </div>
+      <div class="loader-status" id="loader-status">LOAD_SYSTEM_INIT...</div>
+      <div class="loader-scanline"></div>
+    </div>
+  </div>
+
+  <!-- MAIN APP WRAPPER (Hidden during loader) -->
+  <main id="app-container" class="app-container hidden">
+
+    <!-- HEADER / NAVIGATION -->
+    <header class="game-header">
+      <div class="header-logo" id="nav-logo">TIC_TIC</div>
+      <div class="header-actions">
+        <button id="settings-trigger" class="icon-btn" aria-label="Settings">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z">
+            </path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. SETUP / LOBBY SCREEN -->
+    <section id="setup-screen" class="view-panel active">
+      <div class="hero-section">
+        <h1>TIC TIC</h1>
+        <p class="subtitle font-outfit">Choose mode &amp; enter the arena</p>
+      </div>
+
+      <div class="setup-grid">
+        <!-- Player 1 Config -->
+        <div class="player-card card-glow" id="p1-card">
+          <div class="card-tag">Player 1</div>
+          <div class="avatar-display p1-color-glow">X</div>
+          <div class="form-group">
+            <label for="p1-name">Display Name</label>
+            <input type="text" id="p1-name" value="USER_01" maxlength="12" class="neon-input">
+          </div>
+          <div class="color-picker-group">
+            <span class="picker-label">Accent Color</span>
+            <div class="color-options">
+              <button class="color-dot active" data-color="#7c6cfc" style="--btn-color: #7c6cfc;"
+                aria-label="Purple"></button>
+              <button class="color-dot" data-color="#f9577a" style="--btn-color: #f9577a;"
+                aria-label="Rose"></button>
+              <button class="color-dot" data-color="#10b981" style="--btn-color: #10b981;" aria-label="Emerald"></button>
+              <button class="color-dot" data-color="#f97316" style="--btn-color: #f97316;" aria-label="Orange"></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mode Selection Center -->
+        <div class="vs-divider">
+          <div class="vs-text">VS</div>
+          <div class="mode-selector-wrapper">
+            <button id="mode-ai" class="mode-tab active">vs AI</button>
+            <button id="mode-pvp" class="mode-tab">vs Player</button>
+          </div>
+        </div>
+
+        <!-- Player 2 / AI Config -->
+        <div class="player-card card-glow" id="p2-card">
+          <div class="card-tag" id="p2-tag">System AI</div>
+          <div class="avatar-display p2-color-glow" id="p2-avatar">O</div>
+
+          <!-- Interactive name input (changes to dropdown when AI mode) -->
+          <div class="form-group" id="p2-name-group" style="display: none;">
+            <label for="p2-name">Display Name</label>
+            <input type="text" id="p2-name" value="USER_02" maxlength="12" class="neon-input">
+          </div>
+
+          <!-- Difficulty input (visible only when AI mode) -->
+          <div class="form-group" id="ai-difficulty-group">
+            <label for="ai-difficulty">Difficulty</label>
+            <select id="ai-difficulty" class="neon-select">
+              <option value="easy">EASY (SANDBOX)</option>
+              <option value="medium">MEDIUM (CALIBRATED)</option>
+              <option value="unbeatable" selected>UNBEATABLE (MINIMAX)</option>
+            </select>
+          </div>
+
+          <div class="color-picker-group">
+            <span class="picker-label">Accent Color</span>
+            <div class="color-options">
+              <button class="color-dot" data-color="#7c6cfc" style="--btn-color: #7c6cfc;" aria-label="Purple"></button>
+              <button class="color-dot active" data-color="#f9577a" style="--btn-color: #f9577a;"
+                aria-label="Rose"></button>
+              <button class="color-dot" data-color="#10b981" style="--btn-color: #10b981;" aria-label="Emerald"></button>
+              <button class="color-dot" data-color="#f97316" style="--btn-color: #f97316;" aria-label="Orange"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arena-launch-container">
+        <button id="launch-btn" class="glow-button font-syne">Start Game</button>
+      </div>
+
+      <!-- Home page recent matches -->
+      <div class="home-recent-matches card-glow" id="home-recent-matches">
+        <div class="home-recent-header">
+          <span class="home-recent-title font-syne">Recent Match Logs</span>
+        </div>
+        <div class="home-logs-list" id="home-logs-list">
+          <div class="log-empty">No records found. Play a round!</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. GAME ARENA SCREEN -->
+    <section id="game-arena" class="view-panel hidden">
+      <!-- Arena Top Bar -->
+      <div class="arena-controls">
+        <button id="exit-arena-btn" class="text-btn">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          ABANDON PROTOCOL
+        </button>
+        <div class="arena-mode-badge" id="arena-mode-badge">VS SYSTEM [UNBEATABLE]</div>
+      </div>
+
+      <!-- Current Turn Display & Scorecard Wrapper -->
+      <div class="arena-scoreboard-wrapper">
+        <div class="score-card text-left" id="score-p1-card">
+          <div class="score-label" id="score-p1-label">USER_01 (X)</div>
+          <div class="score-value" id="score-p1-val">0</div>
+        </div>
+
+        <!-- Active Turn Plate -->
+        <div class="turn-indicator-card card-glow">
+          <div class="turn-pulse"></div>
+          <span class="turn-text" id="turn-text">TURN: USER_01</span>
+        </div>
+
+        <div class="score-card text-right" id="score-p2-card">
+          <div class="score-label" id="score-p2-label">SYSTEM AI (O)</div>
+          <div class="score-value" id="score-p2-val">0</div>
+        </div>
+      </div>
+
+      <!-- Ties tracker -->
+      <div class="ties-tracker">TIES: <span id="score-ties-val">0</span></div>
+
+      <!-- Game Arena Grid Board -->
+      <div class="board-container">
+        <div class="grid-board" id="grid-board">
+          <!-- 3x3 Cells -->
+          <button class="grid-cell" data-index="0" aria-label="Cell 1"></button>
+          <button class="grid-cell" data-index="1" aria-label="Cell 2"></button>
+          <button class="grid-cell" data-index="2" aria-label="Cell 3"></button>
+
+          <button class="grid-cell" data-index="3" aria-label="Cell 4"></button>
+          <button class="grid-cell" data-index="4" aria-label="Cell 5"></button>
+          <button class="grid-cell" data-index="5" aria-label="Cell 6"></button>
+
+          <button class="grid-cell" data-index="6" aria-label="Cell 7"></button>
+          <button class="grid-cell" data-index="7" aria-label="Cell 8"></button>
+          <button class="grid-cell" data-index="8" aria-label="Cell 9"></button>
+
+          <!-- SVG WINNING LINE LAYER -->
+          <svg class="win-line-svg" viewBox="0 0 100 100" pointer-events="none">
+            <line id="winning-vector" x1="0" y1="0" x2="0" y2="0" stroke="var(--win-line-color, #fff)" stroke-width="3"
+              stroke-linecap="round" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- MATCH HISTORY DRAWER (Bottom slide-up panel) -->
+      <div class="match-history-drawer" id="match-history-drawer">
+        <button class="drawer-handle" id="drawer-handle" aria-label="Toggle Match History">
+          <div class="drawer-handle-bar"></div>
+          <span class="drawer-handle-label">MATCH HISTORY</span>
+          <svg class="drawer-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15"></polyline>
+          </svg>
+        </button>
+        <div class="drawer-content" id="drawer-content">
+          <div class="stats-panel">
+            <div class="stats-summary-grid">
+              <div class="stat-box">
+                <span class="stat-title">P1 Win Rate</span>
+                <span class="stat-num" id="stat-win-rate-x">0%</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-title">P2 Win Rate</span>
+                <span class="stat-num" id="stat-win-rate-o">0%</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-title">Streak</span>
+                <span class="stat-num" id="stat-streak">0</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-title">Best Streak</span>
+                <span class="stat-num" id="stat-max-streak">0</span>
+              </div>
+            </div>
+            <div class="logs-container">
+              <div class="logs-title">Recent Matches</div>
+              <div class="logs-list" id="logs-list">
+                <div class="log-empty">No records found. Play a round!</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ROUND WIN/DRAW BANNER OVERLAY (Hidden by default) -->
+    <div id="result-overlay" class="result-overlay hidden">
+      <div class="result-card card-glow">
+        <div class="result-banner" id="result-banner-title">Victory</div>
+        <div class="result-winner" id="result-winner-name">USER_01 WINS THE ROUND</div>
+        <div class="result-details font-outfit" id="result-details-text">Unbeatable AI was neutralized in 7 moves.</div>
+        <div class="result-actions">
+          <button id="next-round-btn" class="glow-button btn-small">NEXT ROUND</button>
+          <button id="reset-series-btn" class="text-btn">RESET MATCH SCORE</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- CANVAS FOR CONFETTI CELEBRATIONS (body-level for true centering) -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- 4. SETTINGS MODAL -->
+  <div id="settings-modal" class="settings-modal hidden">
+    <div class="settings-card card-glow">
+      <div class="settings-header">
+        <h2 class="font-syne">Settings</h2>
+        <button id="settings-close" class="close-btn" aria-label="Close Settings">&times;</button>
+      </div>
+
+      <div class="settings-body font-outfit">
+        <!-- 1. Theme Configuration -->
+        <div class="setting-item">
+          <label class="setting-label">Color Theme</label>
+          <div class="theme-select-grid">
+            <button class="theme-option active" data-theme="cyberpunk">
+              <span class="theme-preview" style="background: linear-gradient(135deg, #7c6cfc, #f9577a);"></span>
+              Cyberpunk
+            </button>
+            <button class="theme-option" data-theme="midnight">
+              <span class="theme-preview" style="background: linear-gradient(135deg, #4f83f0, #34d399);"></span>
+              Midnight
+            </button>
+            <button class="theme-option" data-theme="forest">
+              <span class="theme-preview" style="background: linear-gradient(135deg, #10b981, #a3e635);"></span>
+              Forest
+            </button>
+            <button class="theme-option" data-theme="sunset">
+              <span class="theme-preview" style="background: linear-gradient(135deg, #f97316, #ef4444);"></span>
+              Sunset
+            </button>
+            <button class="theme-option" data-theme="retro">
+              <span class="theme-preview" style="background: linear-gradient(135deg, #a855f7, #ec4899);"></span>
+              Retro
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Audio Configuration -->
+        <div class="setting-item">
+          <div class="setting-row">
+            <label class="setting-label" for="sound-volume">Sound Effects</label>
+            <input type="checkbox" id="sound-toggle" class="neon-toggle" checked>
+          </div>
+          <div class="volume-slider-wrapper">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+              style="opacity: 0.7;">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            </svg>
+            <input type="range" id="sound-volume" class="neon-slider" min="0" max="100" value="70">
+            <span class="volume-val" id="sound-volume-val">70%</span>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-row">
+            <label class="setting-label" for="music-volume">Ambient Music</label>
+            <input type="checkbox" id="music-toggle" class="neon-toggle" checked>
+          </div>
+          <div class="volume-slider-wrapper">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+              style="opacity: 0.7;">
+              <path d="M9 18V5l12-2v13"></path>
+              <circle cx="6" cy="18" r="3"></circle>
+              <circle cx="18" cy="16" r="3"></circle>
+            </svg>
+            <input type="range" id="music-volume" class="neon-slider" min="0" max="100" value="40">
+            <span class="volume-val" id="music-volume-val">40%</span>
+          </div>
+        </div>
+
+        <!-- 3. Notification Configuration -->
+        <div class="setting-item setting-row">
+          <div class="setting-info">
+            <label class="setting-label">Notifications</label>
+            <span class="setting-desc">Show in-game status messages</span>
+          </div>
+          <input type="checkbox" id="notifications-toggle" class="neon-toggle" checked>
+        </div>
+
+        <!-- 4. Data Control -->
+        <div class="setting-item flex-end">
+          <button id="clear-data-btn" class="danger-btn">Reset All Data</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4b. PAUSE MODAL -->
+  <div id="pause-modal" class="settings-modal hidden">
+    <div class="settings-card card-glow" style="width: min(320px, 90vw);">
+      <div class="settings-header" style="justify-content: center;">
+        <h2 class="font-syne" style="margin-bottom: 0;">Game Paused</h2>
+      </div>
+
+      <div class="pause-body font-outfit" style="display: flex; gap: var(--space-4); justify-content: center; align-items: center; padding: var(--space-6) var(--space-6) var(--space-8) var(--space-6); overflow: hidden;">
+        <button id="pause-continue-btn" class="pause-icon-btn" aria-label="Continue" style="--curr-btn-color: var(--accent);">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <span class="btn-tooltip">Continue</span>
+        </button>
+        <button id="pause-replay-btn" class="pause-icon-btn" aria-label="Replay Round" style="--curr-btn-color: var(--accent-blob-b);">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+          </svg>
+          <span class="btn-tooltip">Replay</span>
+        </button>
+        <button id="pause-settings-btn" class="pause-icon-btn" aria-label="Settings" style="--curr-btn-color: var(--accent-blob-a);">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span class="btn-tooltip">Settings</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Core Javascript Modules -->
+
+</body>
+
+</html>

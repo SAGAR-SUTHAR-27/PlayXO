@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlayXO</title>
+
+  <!-- SEO Meta Tags -->
+  <meta name="description"
+    content="A professional, hyper-interactive Tic Tic arcade experience featuring neon themes, unbeatable minimax AI, synthesized background music, and canvas confetti.">
+  <meta name="keywords" content="Tic Tic, Minimax AI, Browser Game, Neon, Web Audio API, Canvas Confetti">
+  <meta name="author" content="Antigravity">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Syne:wght@700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Core Stylesheet -->
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+
+<body data-theme="cyberpunk">
+
+  <!-- Background Blurry Blobs for Glassmorphism -->
+  <div class="bg-blur-blobs" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <!-- 1. GAME LOADER SCREEN -->
+  <div id="game-loader" class="loader-screen">
+    <div class="loader-content"
+      style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem;">
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+        <img src="assets/logo.jpg" alt="PlayXO Logo"
+          style="width: 130px; height: 130px; border-radius: 16px; box-shadow: 0 0 30px rgba(124, 108, 252, 0.4);">
+        <div class="loader-glitch-title" style="margin-bottom: 0;">PlayXO</div>
+      </div>
+      <div class="loader-bar-container"
+        style="width: 200px; margin-top: 1rem; margin-bottom: 0; background: rgba(255, 255, 255, 0.1); border-radius: 4px; height: 4px; overflow: hidden;">
+        <div class="loader-bar-fill" id="loader-progress"
+          style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent-blob-b)); transition: width 3s linear;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN APP WRAPPER (Hidden during loader) -->
+  <main id="app-container" class="app-container hidden">
+
+    <!-- HEADER / NAVIGATION -->
+    <header id="game-header" class="game-header hidden">
+      <div class="header-logo" id="nav-logo">
+        PlayXO
+      </div>
+      <div class="header-actions">
+        <button id="settings-trigger" class="icon-btn" aria-label="Settings">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z">
+            </path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- 1.5 MAIN MENU SCREEN -->
+    <section id="main-menu" class="view-panel active"
+      style="display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 80vh; padding: 2.5rem 1.5rem 2rem;">
+      <div class="hero-section" style="margin-bottom: var(--space-8);">
+        <img src="assets/logo.jpg" alt="PlayXO Logo"
+          style="width: 160px; height: 160px; border-radius: 16px; box-shadow: 0 0 30px rgba(124, 108, 252, 0.4); margin-bottom: 1rem;">
+        <h1 style="font-size: 3.5rem; margin-top: 1rem;">PlayXO</h1>
+        <p style="color: var(--text-secondary); font-size: 0.95rem; margin-top: 0.4rem; letter-spacing: 0.05em;">The classic game, reimagined.</p>
+      </div>
+      <div class="main-menu-options"
+        style="display: flex; flex-direction: column; gap: 1.2rem; width: min(320px, 90vw);">
+        <button id="btn-play-ai" class="glow-button font-syne"
+          style="width: 100%; font-size: 1.15rem; padding: 1.1rem;">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;vertical-align:middle;">
+            <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+          </svg>Play with AI</button>
+        <button id="btn-play-pvp" class="glow-button font-syne"
+          style="width: 100%; font-size: 1.15rem; padding: 1.1rem; --btn-color: var(--accent-blob-b); background: rgba(249, 87, 122, 0.1);">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;vertical-align:middle;">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>Multiplayer</button>
+
+        <!-- Secondary action row -->
+        <div style="display: flex; gap: 0.6rem; width: 100%;">
+          <button id="btn-how-to-play" class="menu-secondary-btn" style="flex:1; font-size:0.72rem; padding: 0.65rem 0.3rem;">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;vertical-align:middle;flex-shrink:0;">
+              <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r="0.5" fill="currentColor"/>
+            </svg>How to Play</button>
+          <button id="btn-about" class="menu-secondary-btn" style="flex:1; font-size:0.72rem; padding: 0.65rem 0.3rem;">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;vertical-align:middle;flex-shrink:0;">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>About</button>
+          <button id="btn-main-settings" class="menu-secondary-btn" style="flex:1; font-size:0.72rem; padding: 0.65rem 0.3rem;">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;vertical-align:middle;flex-shrink:0;">
+              <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>Settings</button>
+        </div>
+      </div>
+
+      <!-- Social Media Links -->
+      <div class="social-links" style="margin-top: 2.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.8rem;">
+        <div style="display: flex; gap: 1rem; align-items: center;">
+          <a href="https://github.com/SAGAR-SUTHAR-27" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="GitHub">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+              <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+            </svg>
+          </a>
+          <a href="https://www.instagram.com/sgm_devlopers?utm_source=qr&igsh=MWhrMzRtMmUzb3p1Mg%3D%3D" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="Twitter / X">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+          </a>
+          <a href="https://www.instagram.com/sgm_devlopers?utm_source=qr&igsh=MWhrMzRtMmUzb3p1Mg%3D%3D" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/>
+            </svg>
+          </a>
+        </div>
+        <span style="color: var(--text-secondary); font-size: 0.72rem; opacity: 0.45; letter-spacing: 0.05em;">v1.0.0</span>
+      </div>
+    </section>
+
+    <!-- HOW TO PLAY MODAL -->
+    <div id="how-to-play-modal" class="info-modal-overlay hidden">
+      <div class="info-modal-card">
+        <button class="modal-close-btn" id="close-how-to-play" aria-label="Close">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <div class="modal-icon-header" style="--modal-color: var(--accent);">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r="0.5" fill="currentColor"/></svg>
+        </div>
+        <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem;">How to Play</h2>
+        <div class="how-to-steps">
+          <div class="how-to-step">
+            <div class="step-number">1</div>
+            <div>
+              <strong>Choose Your Mode</strong>
+              <p>Play solo against the AI or challenge a friend in Multiplayer mode on the same device.</p>
+            </div>
+          </div>
+          <div class="how-to-step">
+            <div class="step-number">2</div>
+            <div>
+              <strong>Pick Your Symbol</strong>
+              <p>Select <strong>X</strong> or <strong>O</strong> and choose a color theme for your side before starting.</p>
+            </div>
+          </div>
+          <div class="how-to-step">
+            <div class="step-number">3</div>
+            <div>
+              <strong>Take Turns</strong>
+              <p>Players alternate clicking any empty cell on the 3×3 grid to place their symbol.</p>
+            </div>
+          </div>
+          <div class="how-to-step">
+            <div class="step-number">4</div>
+            <div>
+              <strong>Win the Game</strong>
+              <p>Get 3 of your symbols in a row — horizontally, vertically, or diagonally — to win!</p>
+            </div>
+          </div>
+          <div class="how-to-step">
+            <div class="step-number">5</div>
+            <div>
+              <strong>Play Again</strong>
+              <p>Match history is tracked. Use the Pause menu to replay or head back to the main menu anytime.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABOUT MODAL -->
+    <div id="about-modal" class="info-modal-overlay hidden">
+      <div class="info-modal-card">
+        <button class="modal-close-btn" id="close-about" aria-label="Close">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <div class="modal-icon-header" style="--modal-color: var(--accent-blob-b);">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">About PlayXO</h2>
+        <p style="color: var(--text-secondary); line-height: 1.7; margin-bottom: 1.2rem;">
+          <strong style="color: var(--text-primary);">PlayXO</strong> is a beautifully designed Tic-Tac-Toe experience built with pure HTML, CSS, and JavaScript — no frameworks, just clean code and great design.
+        </p>
+        <p style="color: var(--text-secondary); line-height: 1.7; margin-bottom: 1.5rem;">
+          Features include a smart AI opponent, match history tracking, customizable themes, and a smooth animated interface designed for all screen sizes.
+        </p>
+        <div style="padding: 1rem; background: rgba(124,108,252,0.08); border: 1px solid rgba(124,108,252,0.2); border-radius: 12px; text-align: center;">
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">Made with ❤️ &nbsp;·&nbsp; Version 1.0.0</p>
+        </div>
+        <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 1.5rem;">
+          <a href="https://github.com/SAGAR-SUTHAR-27" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="GitHub">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+          </a>
+          <a href="https://www.instagram.com/sgm_devlopers?utm_source=qr&igsh=MWhrMzRtMmUzb3p1Mg%3D%3D" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="Twitter / X">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+          <a href="https://www.instagram.com/sgm_devlopers?utm_source=qr&igsh=MWhrMzRtMmUzb3p1Mg%3D%3D" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. SETUP / LOBBY SCREEN -->
+    <section id="setup-screen" class="view-panel hidden">
+      <div style="width: 100%; display: flex; justify-content: flex-start; padding-top: var(--space-4);">
+        <button id="btn-back-main" class="text-btn">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          BACK
+        </button>
+      </div>
+      <div class="hero-section">
+        <h1>PlayXO</h1>
+        <p class="subtitle font-outfit">Choose mode &amp; enter the arena</p>
+      </div>
+
+      <div class="setup-grid">
+        <!-- Player 1 Config -->
+        <div class="player-card card-glow" id="p1-card">
+          <div class="card-tag">Player 1</div>
+          <div class="avatar-display p1-color-glow">X</div>
+          <div class="form-group">
+            <label for="p1-name">Display Name</label>
+            <input type="text" id="p1-name" value="USER_01" maxlength="12" class="neon-input">
+          </div>
+          <div class="color-picker-group">
+            <span class="picker-label">Accent Color</span>
+            <div class="color-options">
+              <button class="color-dot active" data-color="#7c6cfc" style="--btn-color: #7c6cfc;"
+                aria-label="Purple"></button>
+              <button class="color-dot" data-color="#f9577a" style="--btn-color: #f9577a;" aria-label="Rose"></button>
+              <button class="color-dot" data-color="#10b981" style="--btn-color: #10b981;"
+                aria-label="Emerald"></button>
+              <button class="color-dot" data-color="#f97316" style="--btn-color: #f97316;" aria-label="Orange"></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mode Selection Center -->
+        <div class="vs-divider" style="text-align: center; width: 100%;">
+          <div class="vs-text" style="text-align: center; margin: 0 auto;">VS</div>
+          <div class="mode-selector-wrapper" style="display: none;">
+            <button id="mode-ai" class="mode-tab active">vs AI</button>
+            <button id="mode-pvp" class="mode-tab">vs Player</button>
+          </div>
+        </div>
+
+        <!-- Player 2 / AI Config -->
+        <div class="player-card card-glow" id="p2-card">
+          <div class="card-tag" id="p2-tag">System AI</div>
+          <div class="avatar-display p2-color-glow" id="p2-avatar">O</div>
+
+          <!-- Interactive name input (changes to dropdown when AI mode) -->
+          <div class="form-group" id="p2-name-group" style="display: none;">
+            <label for="p2-name">Display Name</label>
+            <input type="text" id="p2-name" value="USER_02" maxlength="12" class="neon-input">
+          </div>
+
+          <!-- Difficulty input (visible only when AI mode) -->
+          <div class="form-group" id="ai-difficulty-group">
+            <label for="ai-difficulty">Difficulty</label>
+            <select id="ai-difficulty" class="neon-select">
+              <option value="easy">EASY (SANDBOX)</option>
+              <option value="medium">MEDIUM (CALIBRATED)</option>
+              <option value="unbeatable" selected>UNBEATABLE (MINIMAX)</option>
+            </select>
+          </div>
+
+          <div class="color-picker-group">
+            <span class="picker-label">Accent Color</span>
+            <div class="color-options">
+              <button class="color-dot" data-color="#7c6cfc" style="--btn-color: #7c6cfc;" aria-label="Purple"></button>
+              <button class="color-dot active" data-color="#f9577a" style="--btn-color: #f9577a;"
+                aria-label="Rose"></button>
+              <button class="color-dot" data-color="#10b981" style="--btn-color: #10b981;"
+                aria-label="Emerald"></button>
+              <button class="color-dot" data-color="#f97316" style="--btn-color: #f97316;" aria-label="Orange"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arena-launch-container">
+        <button id="launch-btn" class="glow-button font-syne">Start Game</button>
+      </div>
+
+      <!-- Home page recent matches (bottom drawer) -->
+      <div class="lobby-history-drawer" id="lobby-history-drawer">
+        <button class="drawer-handle" id="lobby-drawer-handle" aria-label="Toggle Recent Matches">
+          <div class="drawer-handle-bar"></div>
+          <span class="drawer-handle-label">Recent Match Logs</span>
+          <svg class="drawer-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15"></polyline>
+          </svg>
+        </button>
+        <div class="drawer-content">
+          <div class="home-logs-list" id="home-logs-list">
+            <div class="log-empty">No records found. Play a round!</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. GAME ARENA SCREEN -->
+    <section id="game-arena" class="view-panel hidden">
+      <!-- Arena Top Bar -->
+      <div class="arena-controls">
+        <div class="arena-mode-badge" id="arena-mode-badge">VS SYSTEM [UNBEATABLE]</div>
+      </div>
+
+      <!-- Current Turn Display & Scorecard Wrapper -->
+      <div class="arena-scoreboard-wrapper">
+        <div class="score-card text-left" id="score-p1-card">
+          <div class="score-label" id="score-p1-label">USER_01 (X)</div>
+          <div class="score-value" id="score-p1-val">0</div>
+        </div>
+
+        <!-- Active Turn Plate -->
+        <div class="turn-indicator-card card-glow">
+          <div class="turn-pulse"></div>
+          <span class="turn-text" id="turn-text">TURN: USER_01</span>
+        </div>
+
+        <div class="score-card text-right" id="score-p2-card">
+          <div class="score-label" id="score-p2-label">SYSTEM AI (O)</div>
+          <div class="score-value" id="score-p2-val">0</div>
+        </div>
+      </div>
+
+      <!-- Ties tracker -->
+      <div class="ties-tracker">TIES: <span id="score-ties-val">0</span></div>
+
+      <!-- Game Arena Grid Board -->
+      <div class="board-container">
+        <div class="grid-board" id="grid-board">
+          <!-- 3x3 Cells -->
+          <button class="grid-cell" data-index="0" aria-label="Cell 1"></button>
+          <button class="grid-cell" data-index="1" aria-label="Cell 2"></button>
+          <button class="grid-cell" data-index="2" aria-label="Cell 3"></button>
+
+          <button class="grid-cell" data-index="3" aria-label="Cell 4"></button>
+          <button class="grid-cell" data-index="4" aria-label="Cell 5"></button>
+          <button class="grid-cell" data-index="5" aria-label="Cell 6"></button>
+
+          <button class="grid-cell" data-index="6" aria-label="Cell 7"></button>
+          <button class="grid-cell" data-index="7" aria-label="Cell 8"></button>
+          <button class="grid-cell" data-index="8" aria-label="Cell 9"></button>
+
+          <!-- SVG WINNING LINE LAYER -->
+          <svg class="win-line-svg" viewBox="0 0 100 100" pointer-events="none">
+            <line id="winning-vector" x1="0" y1="0" x2="0" y2="0" stroke="var(--win-line-color, #fff)" stroke-width="3"
+              stroke-linecap="round" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- MATCH HISTORY DRAWER (Bottom slide-up panel) -->
+      <div class="match-history-drawer" id="match-history-drawer">
+        <button class="drawer-handle" id="drawer-handle" aria-label="Toggle Match History">
+          <div class="drawer-handle-bar"></div>
+          <span class="drawer-handle-label">MATCH HISTORY</span>
+          <svg class="drawer-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15"></polyline>
+          </svg>
+        </button>
+        <div class="drawer-content" id="drawer-content">
+          <div class="stats-panel">
+            <div class="stats-summary-grid">
+              <div class="stat-box">
+                <span class="stat-title">P1 Win Rate</span>
+                <span class="stat-num" id="stat-win-rate-x">0%</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-title">P2 Win Rate</span>
+                <span class="stat-num" id="stat-win-rate-o">0%</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-title">Streak</span>
+                <span class="stat-num" id="stat-streak">0</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-title">Best Streak</span>
+                <span class="stat-num" id="stat-max-streak">0</span>
+              </div>
+            </div>
+            <div class="logs-container">
+              <div class="logs-title">Recent Matches</div>
+              <div class="logs-list" id="logs-list">
+                <div class="log-empty">No records found. Play a round!</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ROUND WIN/DRAW BANNER OVERLAY MOVED TO BODY LEVEL -->
+
+  </main>
+
+  <!-- ROUND WIN/DRAW BANNER OVERLAY (Hidden by default) -->
+  <div id="result-overlay" class="result-overlay hidden">
+    <div class="result-card card-glow">
+      <div class="result-banner" id="result-banner-title">Victory</div>
+      <div class="result-winner" id="result-winner-name">USER_01 WINS THE ROUND</div>
+      <div class="result-details font-outfit" id="result-details-text">Unbeatable AI was neutralized in 7 moves.</div>
+      <div class="result-actions">
+        <button id="next-round-btn" class="glow-button btn-small">NEXT ROUND</button>
+        <button id="reset-series-btn" class="text-btn">RESET MATCH SCORE</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CANVAS FOR CONFETTI CELEBRATIONS (body-level for true centering) -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- 4. SETTINGS MODAL -->
+  <div id="settings-modal" class="settings-modal hidden">
+    <div class="settings-card card-glow">
+      <div class="settings-header">
+        <h2 class="font-syne">Settings</h2>
+        <button id="settings-close" class="close-btn" aria-label="Close Settings">&times;</button>
+      </div>
+
+      <div class="settings-body font-outfit">
+        <!-- 1. Theme Configuration -->
+        <div class="setting-item">
+          <label class="setting-label">Color Theme</label>
+          <div class="theme-select-grid">
+            <button class="theme-option active" data-theme="cyberpunk">
+              <span class="theme-preview" style="background: linear-gradient(135deg, #7c6cfc, #f9577a);"></span>
+              Cyberpunk
+            </button>
+            <button class="theme-option" data-theme="midnight">
+              <span class="theme-preview" style="background: linear-gradient(135deg, #4f83f0, #34d399);"></span>
+              Midnight
+            </button>
+            <button class="theme-option" data-theme="forest">
+              <span class="theme-preview" style="background: linear-gradient(135deg, #10b981, #a3e635);"></span>
+              Forest
+            </button>
+            <button class="theme-option" data-theme="sunset">
+              <span class="theme-preview" style="background: linear-gradient(135deg, #f97316, #ef4444);"></span>
+              Sunset
+            </button>
+            <button class="theme-option" data-theme="retro">
+              <span class="theme-preview" style="background: linear-gradient(135deg, #a855f7, #ec4899);"></span>
+              Retro
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Audio Configuration -->
+        <div class="setting-item">
+          <div class="setting-row">
+            <label class="setting-label" for="sound-volume">Sound Effects</label>
+            <input type="checkbox" id="sound-toggle" class="neon-toggle" checked>
+          </div>
+          <div class="volume-slider-wrapper">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+              style="opacity: 0.7;">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            </svg>
+            <input type="range" id="sound-volume" class="neon-slider" min="0" max="100" value="70">
+            <span class="volume-val" id="sound-volume-val">70%</span>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-row">
+            <label class="setting-label" for="music-volume">Ambient Music</label>
+            <input type="checkbox" id="music-toggle" class="neon-toggle" checked>
+          </div>
+          <div class="volume-slider-wrapper">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+              style="opacity: 0.7;">
+              <path d="M9 18V5l12-2v13"></path>
+              <circle cx="6" cy="18" r="3"></circle>
+              <circle cx="18" cy="16" r="3"></circle>
+            </svg>
+            <input type="range" id="music-volume" class="neon-slider" min="0" max="100" value="40">
+            <span class="volume-val" id="music-volume-val">40%</span>
+          </div>
+        </div>
+
+        <!-- 3. Notification Configuration -->
+        <div class="setting-item setting-row">
+          <div class="setting-info">
+            <label class="setting-label">Notifications</label>
+            <span class="setting-desc">Show in-game status messages</span>
+          </div>
+          <input type="checkbox" id="notifications-toggle" class="neon-toggle" checked>
+        </div>
+
+        <!-- 4. Data Control -->
+        <div class="setting-item flex-end">
+          <button id="clear-data-btn" class="danger-btn">Reset All Data</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4b. PAUSE MODAL -->
+  <div id="pause-modal" class="settings-modal hidden">
+    <div class="settings-card card-glow" style="width: min(320px, 90vw);">
+      <div class="settings-header" style="justify-content: center;">
+        <h2 class="font-syne" style="margin-bottom: 0;">Game Paused</h2>
+      </div>
+
+      <div class="pause-body font-outfit"
+        style="display: flex; gap: var(--space-4); justify-content: center; align-items: center; padding: var(--space-6) var(--space-6) var(--space-8) var(--space-6); overflow: hidden;">
+        <button id="pause-continue-btn" class="pause-icon-btn" aria-label="Continue"
+          style="--curr-btn-color: var(--accent);">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <span class="btn-tooltip">Continue</span>
+        </button>
+        <button id="pause-replay-btn" class="pause-icon-btn" aria-label="Replay Round"
+          style="--curr-btn-color: var(--accent-blob-b);">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+          </svg>
+          <span class="btn-tooltip">Replay</span>
+        </button>
+        <button id="pause-settings-btn" class="pause-icon-btn" aria-label="Settings"
+          style="--curr-btn-color: var(--accent-blob-a);">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z">
+            </path>
+          </svg>
+          <span class="btn-tooltip">Settings</span>
+        </button>
+        <button id="pause-exit-btn" class="pause-icon-btn" aria-label="Exit Game"
+          style="--curr-btn-color: #ff6b6b;">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span class="btn-tooltip">Exit</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Core Javascript Modules -->
+  <script type="module" src="js/app.js"></script>
+
+</body>
+
+</html>

@@ -1643,13 +1643,14 @@ input {
 .settings-modal {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(16px) saturate(120%);
-  -webkit-backdrop-filter: blur(16px) saturate(120%);
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   z-index: 200;
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 1rem;
 }
 
 .settings-card {
@@ -1658,6 +1659,11 @@ input {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  /* Solid background so it's visible on mobile where backdrop-filter may not work */
+  background: var(--bg-elevated, #0d1120) !important;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 48px rgba(0, 0, 0, 0.7), 0 1px 0 rgba(255,255,255,0.05) inset;
 }
 
 .settings-header {

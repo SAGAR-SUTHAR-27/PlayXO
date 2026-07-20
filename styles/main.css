@@ -806,11 +806,14 @@ input {
 }
 
 #setup-screen {
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   height: 100%;
   min-height: 0;
+  /* allow content to scroll so Start Game button is always reachable */
+  -webkit-overflow-scrolling: touch;
 }
 
 #setup-screen::-webkit-scrollbar {
@@ -1048,8 +1051,10 @@ input {
 .arena-launch-container {
   display: flex;
   justify-content: center;
-  padding-bottom: var(--space-4);
+  padding: var(--space-4) var(--space-4) var(--space-6);
   flex-shrink: 0;
+  /* Extra bottom clearance so the drawer handle doesn't cover the button */
+  padding-bottom: calc(var(--space-4) + 56px);
 }
 
 .glow-button {
@@ -1525,7 +1530,7 @@ input {
    ============================================================ */
 
 .lobby-history-drawer {
-  position: absolute;
+  position: sticky;
   bottom: 0;
   left: 0;
   right: 0;
@@ -1539,9 +1544,12 @@ input {
   z-index: 90;
   display: flex;
   flex-direction: column;
-  max-height: 70vh;
+  max-height: 60vh;
   backdrop-filter: blur(30px) saturate(180%);
   -webkit-backdrop-filter: blur(30px) saturate(180%);
+  /* Always show the handle tab at the bottom */
+  margin-top: auto;
+  flex-shrink: 0;
 }
 
 .lobby-history-drawer.open {

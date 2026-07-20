@@ -5,23 +5,23 @@
 class SoundEngine {
   constructor() {
     this.ctx = null;
-    
+
     // Volume state (0.0 to 1.0)
-    this.sfxVolume = 0.7;
-    this.bgmVolume = 0.4;
-    
+    this.sfxVolume = 1;
+    this.bgmVolume = 1;
+
     // Enable state
     this.sfxEnabled = true;
     this.bgmEnabled = true;
-    
+
     // Master Node references
     this.sfxGain = null;
     this.bgmGain = null;
-    
+
     // BGM Loop variables
     this.bgmIntervalId = null;
     this.bgmStep = 0;
-    
+
     // Cyberpunk ambient progression: Dm9 - Fmaj7 - Bbmaj7 - Cadd9
     this.chords = [
       [146.83, 174.61, 220.00, 293.66], // D3, F3, A3, D4 (Dm9)
@@ -39,17 +39,17 @@ class SoundEngine {
     try {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       this.ctx = new AudioCtx();
-      
+
       // Setup SFX Channel
       this.sfxGain = this.ctx.createGain();
       this.sfxGain.gain.setValueAtTime(this.sfxEnabled ? this.sfxVolume : 0, this.ctx.currentTime);
       this.sfxGain.connect(this.ctx.destination);
-      
+
       // Setup BGM Channel
       this.bgmGain = this.ctx.createGain();
       this.bgmGain.gain.setValueAtTime(this.bgmEnabled ? this.bgmVolume : 0, this.ctx.currentTime);
       this.bgmGain.connect(this.ctx.destination);
-      
+
       this.startBgmLoop();
     } catch (e) {
       console.warn("Web Audio API is not supported in this browser:", e);
@@ -75,37 +75,37 @@ class SoundEngine {
     // Transient click (higher frequency, extremely short decay)
     const oscTransient = this.ctx.createOscillator();
     const gainTransient = this.ctx.createGain();
-    
+
     oscTransient.type = 'sine';
     oscTransient.frequency.setValueAtTime(1400 * pitchFactor, now);
     oscTransient.frequency.exponentialRampToValueAtTime(800 * pitchFactor, now + 0.006);
-    
+
     gainTransient.gain.setValueAtTime(0, now);
     gainTransient.gain.linearRampToValueAtTime(0.35, now + 0.001);
     gainTransient.gain.exponentialRampToValueAtTime(0.001, now + 0.006);
-    
+
     oscTransient.connect(gainTransient);
     gainTransient.connect(this.sfxGain);
-    
+
     // Resonant block body (mid frequency, wooden/tactile resonance)
     const oscBody = this.ctx.createOscillator();
     const gainBody = this.ctx.createGain();
-    
+
     oscBody.type = 'sine';
     oscBody.frequency.setValueAtTime(600 * pitchFactor, now);
     oscBody.frequency.exponentialRampToValueAtTime(160 * pitchFactor, now + 0.04);
-    
+
     gainBody.gain.setValueAtTime(0, now);
     gainBody.gain.linearRampToValueAtTime(0.55, now + 0.002);
     gainBody.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
-    
+
     oscBody.connect(gainBody);
     gainBody.connect(this.sfxGain);
-    
+
     // Start and stop both oscillators in perfect synchronization
     oscTransient.start(now);
     oscTransient.stop(now + 0.008);
-    
+
     oscBody.start(now);
     oscBody.stop(now + 0.045);
   }
@@ -118,16 +118,16 @@ class SoundEngine {
 
     const osc = this.ctx.createOscillator();
     const gainNode = this.ctx.createGain();
-    
+
     osc.type = 'sine';
     osc.frequency.setValueAtTime(900, this.ctx.currentTime);
-    
+
     gainNode.gain.setValueAtTime(0.12, this.ctx.currentTime);
     gainNode.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.03);
-    
+
     osc.connect(gainNode);
     gainNode.connect(this.sfxGain);
-    
+
     osc.start();
     osc.stop(this.ctx.currentTime + 0.03);
   }
@@ -145,17 +145,17 @@ class SoundEngine {
     notes.forEach((freq, idx) => {
       const osc = this.ctx.createOscillator();
       const gainNode = this.ctx.createGain();
-      
+
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(freq, now + idx * tempo);
-      
+
       gainNode.gain.setValueAtTime(0, now + idx * tempo);
       gainNode.gain.linearRampToValueAtTime(0.25, now + idx * tempo + 0.02);
       gainNode.gain.exponentialRampToValueAtTime(0.01, now + idx * tempo + 0.25);
-      
+
       osc.connect(gainNode);
       gainNode.connect(this.sfxGain);
-      
+
       osc.start(now + idx * tempo);
       osc.stop(now + idx * tempo + 0.28);
     });
@@ -168,28 +168,28 @@ class SoundEngine {
     if (!this.sfxEnabled || !this.ctx) return;
 
     const now = this.ctx.currentTime;
-    
+
     // Two oscillators slightly detuned for chorus effect
     [180, 183].forEach(freq => {
       const osc = this.ctx.createOscillator();
       const gainNode = this.ctx.createGain();
-      
+
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(freq, now);
       osc.frequency.linearRampToValueAtTime(freq - 70, now + 0.6);
-      
+
       // Lowpass filter to warm the sawtooth sound
       const filter = this.ctx.createBiquadFilter();
       filter.type = 'lowpass';
       filter.frequency.setValueAtTime(400, now);
-      
+
       gainNode.gain.setValueAtTime(0.2, now);
       gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.65);
-      
+
       osc.connect(filter);
       filter.connect(gainNode);
       gainNode.connect(this.sfxGain);
-      
+
       osc.start(now);
       osc.stop(now + 0.7);
     });
@@ -203,18 +203,18 @@ class SoundEngine {
 
     const osc = this.ctx.createOscillator();
     const gainNode = this.ctx.createGain();
-    
+
     osc.type = 'sine';
     osc.frequency.setValueAtTime(150, this.ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(1200, this.ctx.currentTime + 0.75);
-    
+
     gainNode.gain.setValueAtTime(0.01, this.ctx.currentTime);
     gainNode.gain.linearRampToValueAtTime(0.35, this.ctx.currentTime + 0.2);
     gainNode.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.75);
-    
+
     osc.connect(gainNode);
     gainNode.connect(this.sfxGain);
-    
+
     osc.start();
     osc.stop(this.ctx.currentTime + 0.75);
   }
@@ -227,21 +227,21 @@ class SoundEngine {
 
     const osc = this.ctx.createOscillator();
     const gainNode = this.ctx.createGain();
-    
+
     osc.type = 'sawtooth';
     osc.frequency.setValueAtTime(220, this.ctx.currentTime);
-    
+
     const filter = this.ctx.createBiquadFilter();
     filter.type = 'lowpass';
     filter.frequency.setValueAtTime(300, this.ctx.currentTime);
 
     gainNode.gain.setValueAtTime(0.25, this.ctx.currentTime);
     gainNode.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
-    
+
     osc.connect(filter);
     filter.connect(gainNode);
     gainNode.connect(this.sfxGain);
-    
+
     osc.start();
     osc.stop(this.ctx.currentTime + 0.15);
   }
@@ -251,7 +251,7 @@ class SoundEngine {
     if (this.bgmIntervalId) return;
 
     const tempo = 400; // Time in ms between arpeggio beats
-    
+
     this.bgmIntervalId = setInterval(() => {
       if (!this.bgmEnabled || !this.ctx || this.ctx.state === 'suspended') return;
 
@@ -271,7 +271,7 @@ class SoundEngine {
       const filter = this.ctx.createBiquadFilter();
 
       osc.type = 'triangle';
-      
+
       // Determine note pitch (mix arpeggio with random pentatonic highlights)
       let freq = noteInChord;
       if (this.bgmStep % 8 === 6 && Math.random() > 0.4) {
@@ -285,8 +285,8 @@ class SoundEngine {
       filter.frequency.exponentialRampToValueAtTime(200, now + 0.35);
 
       gainNode.gain.setValueAtTime(0, now);
-      gainNode.gain.linearRampToValueAtTime(0.08, now + 0.05); // Very soft plucks
-      gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+      gainNode.gain.linearRampToValueAtTime(0.60, now + 0.05); // Boosted pluck volume
+      gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.50);
 
       osc.connect(filter);
       filter.connect(gainNode);
@@ -303,7 +303,7 @@ class SoundEngine {
   synthesizePadNote(freq, duration) {
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
-    
+
     const osc = this.ctx.createOscillator();
     const gainNode = this.ctx.createGain();
     const filter = this.ctx.createBiquadFilter();
@@ -315,7 +315,7 @@ class SoundEngine {
     filter.frequency.setValueAtTime(130, now);
 
     gainNode.gain.setValueAtTime(0, now);
-    gainNode.gain.linearRampToValueAtTime(0.07, now + 0.5);
+    gainNode.gain.linearRampToValueAtTime(0.38, now + 0.5);
     gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration);
 
     osc.connect(filter);
